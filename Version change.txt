@@ -1,0 +1,4 @@
+主要通过git reset --hard 版本号（即commit 后面一串）
+
+版本号可以通过git log 查看提交历史来获取（从新恢复旧
+或者通过 git reflog查看操作历史来获取（从旧恢复新
