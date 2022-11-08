@@ -48,7 +48,7 @@ def Bring_All(dir,save_path):
         
 '''      if(re.search(r'[[](.*?)[]]',file)):            #获取方括号里的东西
         ret=re.search(r'[[](.*?)[]]',file)
-        print(ret.span())                             #xxx.span()返回元组，获得其中的数字用min（），max（）
+        print(ret.span())                             #xxx.span()返回元组,获得其中的数字用min(),max()
         fir=min(ret.span())           
         las=max(ret.span())
         print(file[:fir]+file[las:]) 
