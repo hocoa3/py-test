@@ -1,0 +1,3 @@
+1. 对处于工作区修改乱了的文件，还没有git add至暂存区，可以用git checkout -- file 的方式回到修改之前的文件
+2. 对于已经git add的文件，需要先git reset HEAD file 就回到第一步了
+3. 对于已经commit的文件，使用版本回退功能，前提没有提交到远程库
