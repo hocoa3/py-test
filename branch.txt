@@ -1,0 +1,12 @@
+git里的创建切换删除分支都是在指针上操作的，本质工作文件并不改变。head指针指向master等分支指针，然后分支指针再指向文件。
+
+git checkout -b <branch>  -b表示创建并切换，没有则表示切换 -d表示删除
+git branch <new branch>   创建新分支
+git merge <branch> 合并指定分支到当前指针
+////////////////////////////////////////////////////
+现在git switch 代替git checkout 来切换分支
+git switch -c <branch> -c表创建并切换，没有则切换
+
+merge模式默认为fast foward，这个就直接将指针指向最新的那个（相当于更新，但看不出合并
+
+但加了参数 --no-ff 禁用fast forward后，普通模式，相当于会创建一个新的commit（可以看出合并

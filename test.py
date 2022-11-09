@@ -3,13 +3,33 @@ import os
 import os.path
 
 
-dir='C:/Users/86178/BaiduNetDisk'
+dir='D:/まりさやか/近期作品'
 save_path='D:/GreemBang作品合集/GreemBang/[Patreon] Greem Bang -2021年2月'
 
 def test():
-  for file in os.listdir(dir):                        #统一修改文件后缀名
+  for file in os.listdir(dir):
+    if(re.match('新建',file)):
+      for file1 in os.listdir(dir+'/'+file):
+        rt=re.search(r'[】](.*?)[#]',file1)
+        if(rt!=None):
+          #print(rt.group())
+          name1=rt.group()[1:-1]
+          print(name1)
+          if(os.path.exists(dir+'/'+file)):
+            os.renames(dir+'/'+file,dir+'/'+name1)
+        print(file1)
+
+  '''
+  for file in os.listdir(dir):                          #检测空文件夹，暂时没法删除
+    if(os.path.isdir(dir+'/'+file)): 
+      if(not os.listdir(dir+'/'+file)):
+        os.remove(dir+'/'+file)
+        print(dir+'/'+file)
+    else:
+      print('文件:'+file)'''
+  '''for file in os.listdir(dir):                        #统一修改文件后缀名
     if(re.search('iso',file)):
-      os.rename(dir+'/'+file,dir+'/'+file[:-3]+'rar')
+      os.rename(dir+'/'+file,dir+'/'+file[:-3]+'rar')'''
    
 def Bring_All(dir,save_path):                         #将各个小文件夹全部取出放到存储路径
     for file in os.listdir(dir):
