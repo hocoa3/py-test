@@ -3,10 +3,17 @@ import os
 import os.path
 
 
-dir='D:/chihiro🍓'
+dir='D:/！已OK/スカイ(开大车漫画)'
 save_path='D:/GreemBang作品合集/GreemBang/[Patreon] Greem Bang -2021年2月'
 
 def test():
+  sta=10
+  end=22
+  count=1
+  while(sta<end or sta==end):
+    os.rename(dir+'/00'+str(sta)+'.jpg',dir+'/'+str(count)+'/00'+str(sta)+'.jpg')
+    sta=sta+1
+  '''
   for file in os.listdir(dir):                              #根据文件里的日期创建日期文件夹，然后把对应日期的文件放进去
     rt=re.search(r'\d{4}-\d{2}-\d{2}',file)
     if(rt!=None):
@@ -14,6 +21,7 @@ def test():
         os.mkdir(dir+'/'+str(rt.group()))
       os.rename(dir+'/'+file,dir+'/'+str(rt.group())+'/'+file)
       print(dir+'/'+str(rt.group())+'/'+file)
+  '''
   '''                            #给新建文件夹改名
   for file in os.listdir(dir):
     if(re.match('新建',file)):
