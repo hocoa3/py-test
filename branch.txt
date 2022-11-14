@@ -10,3 +10,16 @@ git switch -c <branch> -c表创建并切换，没有则切换
 merge模式默认为fast foward，这个就直接将指针指向最新的那个（相当于更新，但看不出合并
 
 但加了参数 --no-ff 禁用fast forward后，普通模式，相当于会创建一个新的commit（可以看出合并
+
+git stash 可以用于临时存储工作区（可以多次使用）（像中断那样）
+git stash list 查看哪些被存储了
+git stash pop 用于恢复临时存储的工作区
+
+git cherry-pick <任务令号>可以让一个分支的修改提交让现在的这个分支也进行一次相同的修改（塞拉斯，但任务令号不同）
+
+git branch -D <name> 强制删除一个没合并过的分支
+多人协作
+1. 使用git push <> <>推送自己的修改
+2. 若没有推送成功，有可能是分支没有与远程仓库关联(远程分支名字和本地最好一样)
+使用git branch --set-upstream-to=<远程仓库分支地址(如origin/dev> <本地分支(如dev）>
+3.再pull，有冲突就修改，没冲突就提交成功

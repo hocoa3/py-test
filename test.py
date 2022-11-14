@@ -3,24 +3,33 @@ import os
 import os.path
 
 
-dir='D:/！已OK/スカイ(开大车漫画)'
-save_path='D:/GreemBang作品合集/GreemBang/[Patreon] Greem Bang -2021年2月'
-
+dir='D:/osisio(CG,棒)'
+save_path='D:/Nahaki(插画,很棒，等待更新)#21.10'
+flag=1
+#flag=1时为test,2为Bring_all,3为Keep_name
 def test():
-  sta=10
-  end=22
-  count=1
+  for file in os.listdir(dir):                              #将年份添加到所属文件夹名字并移出到上一层
+    for file1 in os.listdir(dir+'/'+file):
+      if(os.path.isdir(dir+'/'+file+'/'+file1)):
+        os.renames(dir+'/'+file+'/'+file1,dir+'/'+file+'-'+file1)
+        print(dir+'/'+file+'-'+file1)
+  '''                                                       #移动固定页数到固定文件夹
+  sta=362                     #开始页数
+  end=384                     #结束页数
+  count=20                    #文件夹名字
   while(sta<end or sta==end):
-    os.rename(dir+'/00'+str(sta)+'.jpg',dir+'/'+str(count)+'/00'+str(sta)+'.jpg')
+    os.rename(dir+'/0'+str(sta)+'.jpg',dir+'/'+str(count)+'/0'+str(sta)+'.jpg')
     sta=sta+1
   '''
-  for file in os.listdir(dir):                              #根据文件里的日期创建日期文件夹，然后把对应日期的文件放进去
-    rt=re.search(r'\d{4}-\d{2}-\d{2}',file)
-    if(rt!=None):
-      if(not os.path.exists(dir+'/'+str(rt.group()))):
-        os.mkdir(dir+'/'+str(rt.group()))
-      os.rename(dir+'/'+file,dir+'/'+str(rt.group())+'/'+file)
-      print(dir+'/'+str(rt.group())+'/'+file)
+  '''
+  for file in os.listdir(dir):                              #根据文件里的特征创建文件夹，然后把对应特征的文件放进去
+    if(os.path.isfile(dir+'/'+file)):
+      rt=re.match(r'\d{5,15}',file)
+      if(rt!=None):
+        if(not os.path.exists(dir+'/'+str(rt.group()))):
+          os.mkdir(dir+'/'+str(rt.group()))
+        os.rename(dir+'/'+file,dir+'/'+str(rt.group())+'/'+file)
+        print(dir+'/'+str(rt.group())+'/'+file)
   '''
   '''                            #给新建文件夹改名
   for file in os.listdir(dir):
@@ -75,7 +84,7 @@ def Keep_Name(dir,save_path):                         #保存小文件夹名字�
         dir1=dir+'/'+file
         Keep_Name(dir1,save_path)
       else:
-        rt=re.search('月/',dir+'/'+file)
+        rt=re.search('】/',dir+'/'+file)              #需要提供一个特征来捕捉目标文件夹，比如】/1，1文件夹中为想要提取出来的文件,则填】
         print(rt.span())
         las=max(rt.span())
         print((dir+'/'+file)[las:])
@@ -83,9 +92,12 @@ def Keep_Name(dir,save_path):                         #保存小文件夹名字�
         os.rename(dir+'/'+file,save_path+'/'+name)
 
 def main():
-  test()
-  #Bring_All(dir,save_path)
-  #Keep_Name(dir,save_path)
+  if(flag==1):
+    test()
+  elif(flag==2):
+    Bring_All(dir,save_path)
+  elif(flag==3):
+    Keep_Name(dir,save_path)
 
 if __name__=='__main__':
     main()
