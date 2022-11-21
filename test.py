@@ -1,24 +1,93 @@
 import re
 import os 
 import os.path
-
-
-dir='D:/osisio(CG,棒)'
-save_path='D:/Nahaki(插画,很棒，等待更新)#21.10'
+from functools import reduce
+dir=r'D:\かものめ\2022'
+dir1=(r'C:\Users\86178\BaiduNetDisk\こんな幼馴染がいてほしい\Fanbox\幼馴染系列')
+save_path=r'D:/Nahaki(插画,很棒，等待更新)#21.10'
+dir=dir.replace('\\','/')                             #将地址转义
+save_path=save_path.replace('\\','/')
 flag=1
 #flag=1时为test,2为Bring_all,3为Keep_name
-def test():
+                                                        #str->float
+def test(dir,save_path):
+  for name in os.listdir(dir):                            #删除固定页数以外的其他所有
+    dir1=dir+'/'+name
+    print(dir1)         
+                                                     
+    sta=input("开始")
+    if(sta=='p'):
+      continue
+    elif(sta=='done'):
+      break
+    sta1=int(sta)-1
+    end=input("结束")
+    end1=int(end)+1
+    num=len(os.listdir(dir1))
+    print(num)
+    while(sta1>0 or end1<(num+1)):
+      if(os.path.exists(dir1+'/'+str(sta1)+'.jpeg')):
+        os.remove(dir1+'/'+str(sta1)+'.jpeg')
+        print('remove1' +dir1+str(sta1)+'.jpeg')
+        sta1=sta1-1
+      else:
+        sta1=sta1-1
+        if(sta1<-400):
+          break
+      if(os.path.exists(dir1+'/'+str(end1)+'.jpeg')):
+        os.remove(dir1+'/'+str(end1)+'.jpeg')
+        print('remove2' +dir1+'/'+str(end1)+'.jpeg')
+        end1=end1+1
+      
+  ''' 
+  idx=s.index('.')                                          #索引目标位置
+  p1=reduce(big,map(str2int,s[:idx]))+(reduce(small,map(str2int,s[idx+1:]))/10**len(s[idx+1:]))
+  return p1
+  '''                                                                 
+  '''                                                     #杨辉三角
+  L=[1]                                                    #a[::-1]字符串倒写
+  yield L
+  L=[1,1]
+  while (n-1)>0:
+    yield L
+    n=n-1
+    L=[1]+ [L[i]+L[i+1] for i in range(len(L)-1)] + [1]     #[]+[]可以把列表连接起来
+  '''    
+  '''
+  for file in os.listdir(dir):                                #为文件添加前缀
+    os.rename(dir+'/'+file,dir+'/fanbox-'+file)
+  '''
+  '''
+  for file in os.listdir(dir):                                #../2，把2里的文件提取出来到前一层,变成../file
+    for file1 in os.listdir(dir+'/'+file):
+      if(os.path.isdir(dir+'/'+file+'/'+file1)):
+        Bring_All(dir+'/'+file+'/'+file1,dir+'/'+file)
+  '''
+  '''
   for file in os.listdir(dir):                              #将年份添加到所属文件夹名字并移出到上一层
     for file1 in os.listdir(dir+'/'+file):
       if(os.path.isdir(dir+'/'+file+'/'+file1)):
         os.renames(dir+'/'+file+'/'+file1,dir+'/'+file+'-'+file1)
         print(dir+'/'+file+'-'+file1)
-  '''                                                       #移动固定页数到固定文件夹
-  sta=362                     #开始页数
-  end=384                     #结束页数
-  count=20                    #文件夹名字
+  '''
+  '''
+                                                        #移动固定页数到固定文件夹
+  sta=216
+  #开始页数
+  end=240
+  #结束页数
+  count=11
+  #文件夹名字
   while(sta<end or sta==end):
-    os.rename(dir+'/0'+str(sta)+'.jpg',dir+'/'+str(count)+'/0'+str(sta)+'.jpg')
+    os.rename(dir+'/'+str(sta)+'.jpeg',dir+'/'+str(count)+'/'+str(sta)+'.jpeg')   #模式1
+  
+    if(sta<10):
+      os.rename(dir+'/000'+str(sta)+'.jpg',dir+'/'+str(count)+'/000'+str(sta)+'.jpg') #模式2
+    elif(sta<100 and sta>9):
+      os.rename(dir+'/00'+str(sta)+'.jpg',dir+'/'+str(count)+'/00'+str(sta)+'.jpg')
+    elif(sta<1000 and sta>99):
+      os.rename(dir+'/0'+str(sta)+'.jpg',dir+'/'+str(count)+'/0'+str(sta)+'.jpg')
+
     sta=sta+1
   '''
   '''
@@ -31,7 +100,7 @@ def test():
         os.rename(dir+'/'+file,dir+'/'+str(rt.group())+'/'+file)
         print(dir+'/'+str(rt.group())+'/'+file)
   '''
-  '''                            #给新建文件夹改名
+  '''                                                     #给新建文件夹改名
   for file in os.listdir(dir):
     if(re.match('新建',file)):
       for file1 in os.listdir(dir+'/'+file):
@@ -93,7 +162,7 @@ def Keep_Name(dir,save_path):                         #保存小文件夹名字�
 
 def main():
   if(flag==1):
-    test()
+    test(dir,save_path)
   elif(flag==2):
     Bring_All(dir,save_path)
   elif(flag==3):

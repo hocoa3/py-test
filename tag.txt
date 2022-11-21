@@ -1,0 +1,13 @@
+1. git tag <tagname> <序列号> 为当前commit增加标签，指定序列号可以指定特定commit.
+
+2. git tag -a <tagname> -m "内容" 可以为标签名为tagname的增加说明
+
+3. git tag 可以查看所有标签
+
+4. git push origin <tagname>推送一个远程标签
+
+5. git push origin --tags 推送所有未推送过的本地标签
+
+6. git tag -d <tagname> 删除一个本地标签
+
+7. git push origin :refs/tags/<tagname>删除一个远程标签
