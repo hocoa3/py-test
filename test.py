@@ -2,15 +2,42 @@ import re
 import os 
 import os.path
 from functools import reduce
-dir=r'D:\かものめ\2022'
+import functools
+import time
+import pHash
+
+import numpy as np
+import cv2
+dir=r'C:\Users\86178\BaiduNetDisk\1'
 dir1=(r'C:\Users\86178\BaiduNetDisk\こんな幼馴染がいてほしい\Fanbox\幼馴染系列')
 save_path=r'D:/Nahaki(插画,很棒，等待更新)#21.10'
 dir=dir.replace('\\','/')                             #将地址转义
 save_path=save_path.replace('\\','/')
-flag=1
-#flag=1时为test,2为Bring_all,3为Keep_name
+flag=4
+#flag=1时为test,2为Bring_all,3为Keep_name,4为相互比较文件
                                                         #str->float
+def metric(func):                                                          
+    @functools.wraps(func)
+    def wrapper(*args,**kw):
+        f1=time.time()
+        res=func(*args,**kw)
+        f2=time.time()
+        print('%s executed in %.1fs ' % (func.__name__,float(f2-f1)))
+        return res
+    return wrapper
+
+def log(func):
+    @functools.wraps(func)
+    def wrapper(*args,**kw):
+        print('%s executed in %s-%s-%s %s:%s:%s ' % (func.__name__, time.localtime().tm_year,time.localtime().tm_mon,time.localtime().tm_mday,time.localtime().tm_hour,time.localtime().tm_min,time.localtime().tm_sec))
+        return func
+    return wrapper
+
+
+@metric
 def test(dir,save_path):
+
+  '''
   for name in os.listdir(dir):                            #删除固定页数以外的其他所有
     dir1=dir+'/'+name
     print(dir1)         
@@ -38,7 +65,7 @@ def test(dir,save_path):
         os.remove(dir1+'/'+str(end1)+'.jpeg')
         print('remove2' +dir1+'/'+str(end1)+'.jpeg')
         end1=end1+1
-      
+  '''
   ''' 
   idx=s.index('.')                                          #索引目标位置
   p1=reduce(big,map(str2int,s[:idx]))+(reduce(small,map(str2int,s[idx+1:]))/10**len(s[idx+1:]))
@@ -125,7 +152,60 @@ def test(dir,save_path):
   '''for file in os.listdir(dir):                        #统一修改文件后缀名
     if(re.search('iso',file)):
       os.rename(dir+'/'+file,dir+'/'+file[:-3]+'rar')'''
-   
+
+
+def phash(img_addr):
+    #第一步,处理图片为32x32，并转为灰度图，数字也用浮点数表示
+    img=cv2.imread(img_addr)
+    img=cv2.resize(img,(32,32))
+    img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    img=img.astype(np.float32)
+
+    #第二步，离散余弦变化
+    img=cv2.dct(img)
+    img=img[0:8,0:8]
+    sum=0.
+    hash_str=''
+
+    #第三步,计算均值
+    #avg=np.sum（img)/64.0
+    for i in range(8):
+        for j in range(8):
+            sum+=img[i,j]
+    avg=sum/64.0                                                
+
+    #第四部,获得哈希
+    for i in range(8):
+        for j in range(8):
+            if(img[i,j]>avg):
+                hash_str=hash_str+'1'
+            else:                                               #一共64位哈希值
+                hash_str=hash_str+'0'
+    return hash_str
+
+
+def Haming_Distance(hash1,hash2):                                 #汉明距离不同有15，以下判定为相似以上则判断为不同
+    num=0
+    if(len(hash1)==len(hash2)):
+        for i in range(len(hash1)):
+            if(hash1[i]!=hash2[i]):
+                num+=1
+        return num
+    else:
+        print("Amount of Hash Code different")
+        return -1
+
+
+@metric
+def InterComparsion(dir):
+  Hash_List=[]
+  name_List=[]
+  for file in os.listdir(dir):
+    Hash_List.append(phash(dir+'/'+file))
+    name_List.append(file)
+  return Hash_List,name_List
+
+@metric
 def Bring_All(dir,save_path):                         #将各个小文件夹全部取出放到存储路径
     for file in os.listdir(dir):
       if(os.path.isdir(dir+'/'+file)):
@@ -147,6 +227,7 @@ def Bring_All(dir,save_path):                         #将各个小文件夹全�
         os.rename(dir+'/'+file,dir+'/'+file[:fir]+file[las:])         '''
 
 
+@metric
 def Keep_Name(dir,save_path):                         #保存小文件夹名字到下一层的文件然后取出到存储路径
     for file in os.listdir(dir):
       if(os.path.isdir(dir+'/'+file)):
@@ -167,6 +248,13 @@ def main():
     Bring_All(dir,save_path)
   elif(flag==3):
     Keep_Name(dir,save_path)
+  elif(flag==4):
+    Hash_List,name_List= InterComparsion(dir)
+    
+    for i in range(len(Hash_List)):
+      for j in range(len(Hash_List)):
+        print("%s and %s Haming_Distance is %d" % (name_List[i],name_List[j],Haming_Distance(Hash_List[i],Hash_List[j])))
+    
 
 if __name__=='__main__':
     main()
