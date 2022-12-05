@@ -77,14 +77,16 @@ class BOM_List():
         self._ws[pos]=data
         print("%s has rewrited to %s"%(pos,data))
         
-
+   
     def Save(self):
         self._wb.save(self.dir+'/'+self.filename)
         print('save done')
 
 class Template_List(BOM_List):
-    def __init__(self):
-        self.file=r'C:\Users\86178\Desktop\BOM_Template1.xlsx'
+    def __init__(self,name):
+        self.file=r'C:\Users\86178\Desktop'
+        self.file=self.file.replace('\\','/')
+        self.file=self.file+'/'+name
         self._wb=openpyxl.load_workbook(self.file)
         self._ws=self._wb.active
 
@@ -206,15 +208,16 @@ class Template_List(BOM_List):
         print('save done')
 
 if __name__=='__main__':
-    name1='BOM_Test.xlsx'     
+    name1='BOM_Test.xlsx'
+    Template_name='BOM_Template1.xlsx'
     #物料清单源文件名字在此输入
     BOM1=BOM_List(name1)
     #dat=BOM1.Read_One_Block('C8')
-    mark_list=BOM1.Read_One_Column(4)
-    volume_list=BOM1.Read_One_Column(1)
-    footprint_list=BOM1.Read_One_Column(2)
-    quantity_list=BOM1.Read_One_Column(3)
-    Template=Template_List()
+    mark_list=BOM1.Read_One_Column(4)                                                         #读取下标
+    volume_list=BOM1.Read_One_Column(1)                                                       #读取大小
+    footprint_list=BOM1.Read_One_Column(2)                                                    #读取封装
+    quantity_list=BOM1.Read_One_Column(3)                                                     #读取数量
+    Template=Template_List(Template_name)
 
     Template.Write_OnebyColumn_mark(mark_list)                                                #处理下标
     Template.Write_OnebyColumn_VolumeandFootPrint(volume_list,footprint_list,quantity_list)   #处理封装和大小
