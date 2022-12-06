@@ -35,21 +35,160 @@ class Alphabet(Enum):
     Y=25
     Z=26
 
-class Component():
-    def __init__(self,mark,footprint,volume,num,quantity):
-        self.mark=mark
-        self.footprint=footprint
-        self.volume=volume
-        self.num=num
-        self.quantity=quantity
 
-class BOM_List():
+def Order_Method_RLC(List):
+        for j in range(len(List)):
+            for k in range(j+1,len(List)):
+                mark1=re.search(r'(\d{1,4}?)-',List[j].name)
+                mark2=re.search(r'(\d{1,4}?)-',List[k].name)
+                if(mark1==None or mark2==None):
+                    if(mark1==None):
+                        print(List[j].name)
+                    elif(mark1==None):
+                        print(List[k].name)
+                    break
+                else:
+                    mark1=mark1.group()
+                    mark2=mark2.group()
+                    if(mark1>mark2):
+                        temp=List[j]
+                        List[j]=List[k]
+                        List[k]=temp
+
+def Order_Method_VN(List):
+    for j in range(len(List)):
+            for k in range(j+1,len(List)):
+                mark1=re.search(r'N\d{1,2}',List[j].mark)
+                mark2=re.search(r'N\d{1,2}',List[k].mark)
+                if(mark1==None or mark2==None):
+                    if(mark1==None):
+                        print(List[j].name)
+                    elif(mark1==None):
+                        print(List[k].name)
+                    break
+                else:
+                    mark1=mark1.group()[1:]
+                    mark2=mark2.group()[1:]
+                    if(int(mark1)>int(mark2)):
+                        temp=List[j]
+                        List[j]=List[k]
+                        List[k]=temp
+
+class Component():
+    def __init__(self):
+        self.mark=None
+        self.footprint=None
+        self.volume=None
+        self.quantity=None
+        self.name=None
+
+class BOM_List(Component):
     def __init__(self,filename):
         dir=r'C:\Users\86178\Desktop'
         self.dir=dir.replace('\\','/')
         self.filename=filename
         self._wb=openpyxl.load_workbook(self.dir+'/'+self.filename)
         self._ws=self._wb.active
+        self.Component_List=None
+
+    def Read_Component(self):
+        start_pos='A6'
+        Component_List=[]
+        for i in range(6,self._ws.max_row+1):
+            New_Component=Component()
+            for j in range(4):                                     #D6
+                pos=chr(ord(start_pos[0])+j)+str(i)     #j=0是大小,i=j=1是封装，j=2是数量，j=3是下标
+                if(j==0):
+                    New_Component.volume=self._ws.cell(int(pos[1:]),ord(pos[0])-64).value
+                elif(j==1):
+                    New_Component.footprint=self._ws.cell(int(pos[1:]),ord(pos[0])-64).value
+                elif(j==2):
+                    New_Component.quantity=self._ws.cell(int(pos[1:]),ord(pos[0])-64).value
+                elif(j==3):
+                    New_Component.mark=self._ws.cell(int(pos[1:]),ord(pos[0])-64).value
+            Component_List.append(New_Component)
+            print(New_Component.mark)
+        self.Component_List=Component_List
+
+    def Create_Name(self):
+        for x in range(len(self.Component_List)):
+            if(re.search('F',str(self.Component_List[x].volume)) and re.match(r'\d{4}',str(self.Component_List[x].footprint))):
+                    self.Component_List[x].name='贴片电容'+str(self.Component_List[x].footprint)+'-'+str(self.Component_List[x].volume)
+            elif(re.search('F',str(self.Component_List[x].volume)) and re.match(r'\d{3}',str(self.Component_List[x].footprint))):
+                    self.Component_List[x].name='贴片电容0'+str(self.Component_List[x].footprint)+'-'+str(self.Component_List[x].volume)
+            elif(re.match(r'\d{3} \d{3} \d{3}',str(self.Component_List[x].volume))):
+                    self.Component_List[x].name='磁珠0'+str(self.Component_List[x].footprint)+'-'+str(self.Component_List[x].volume)
+            elif(re.match(r'\d{4}',str(self.Component_List[x].footprint))):
+                    self.Component_List[x].name='贴片电阻'+str(self.Component_List[x].footprint)+'-'+str(self.Component_List[x].volume)+'Ω'
+            elif(re.match(r'\d{3}',str(self.Component_List[x].footprint))):
+                    self.Component_List[x].name='贴片电阻0'+str(self.Component_List[x].footprint)+'-'+str(self.Component_List[x].volume)+'Ω'
+            else:
+                    self.Component_List[x].name=str(self.Component_List[x].volume)  
+        
+
+    
+
+    def Order_Component(self):                                              #先R后C再L再V(二极管之类)再N(芯片),V也作为其他类型的存储
+        R_List=[]
+        C_List=[]
+        L_List=[]
+        V_List=[]
+        N_List=[]
+        All_List=[R_List,C_List,L_List,V_List,N_List]
+
+        for i in range(len(self.Component_List)):                              #分成几组，在进行内部排序，再把每个小组依次写进去
+            if(self.Component_List[i].mark[0]=='R'):
+                R_List.append(self.Component_List[i])
+            elif(self.Component_List[i].mark[0]=='C'):
+                C_List.append(self.Component_List[i])
+            elif(self.Component_List[i].mark[0]=='L'):
+                L_List.append(self.Component_List[i])
+            elif(self.Component_List[i].mark[0]=='V'):
+                V_List.append(self.Component_List[i])
+            elif(self.Component_List[i].mark[0]=='N'):
+                N_List.append(self.Component_List[i])
+            else:
+                V_List.append(self.Component_List[i])
+        Order_Method_RLC(R_List)
+        Order_Method_RLC(C_List)
+        Order_Method_RLC(L_List)
+        Order_Method_VN(V_List)
+        Order_Method_VN(N_List)
+        for x in range(len(N_List)):
+            print(N_List[x].mark)
+        return All_List
+
+    def Write_Component(self,List):
+        start_pos='B8'
+        off=0
+        for x in range(5):
+            if(x==1):
+                leng=len(List[0])
+            elif(x==2):
+                leng=len(List[0])+len(List[1])
+            elif(x==3):
+                leng=len(List[0])+len(List[1])+len(List[2])
+            elif(x==4):
+                leng=len(List[0])+len(List[1])+len(List[2])+len(List[3])
+            else:
+                leng=0
+            for y in range(len(List[x])):
+                for z in range(6):
+                    pos=chr(ord(start_pos[0])+z)+str(int(start_pos[1])+y+leng+off)
+                    if(z==1):
+                        data=List[x][y].mark
+                    elif(z==0):
+                        data=y+leng+5
+                    elif(z==3):
+                        data=List[x][y].name
+                    elif(z==4):
+                        data='个'
+                    elif(z==5):
+                        data=List[x][y].quantity
+                    else:
+                        data=None
+                    self.Write_One_Block(pos,data)
+        self.Save()
 
     def Read_One_Block(self,loc):
         print(self._ws[loc].value)
@@ -83,10 +222,10 @@ class BOM_List():
         print('save done')
 
 class Template_List(BOM_List):
-    def __init__(self,name):
-        self.file=r'C:\Users\86178\Desktop'
-        self.file=self.file.replace('\\','/')
-        self.file=self.file+'/'+name
+    def __init__(self):
+        self.file=r'C:\Users\86178\Desktop\BOM_Template1.xlsx'
+        #self.file=self.file.replace('\\','/')
+        
         self._wb=openpyxl.load_workbook(self.file)
         self._ws=self._wb.active
 
@@ -200,8 +339,6 @@ class Template_List(BOM_List):
                 num=num -4
             pos=pos[0]+str(x+8+1+off)
         self.Save()
-    
-    
 
     def Save(self):
         self._wb.save(self.file)
@@ -209,10 +346,18 @@ class Template_List(BOM_List):
 
 if __name__=='__main__':
     name1='BOM_Test.xlsx'
-    Template_name='BOM_Template1.xlsx'
+    Template_name=''
     #物料清单源文件名字在此输入
     BOM1=BOM_List(name1)
-    #dat=BOM1.Read_One_Block('C8')
+    
+    BOM1.Read_Component()
+    BOM1.Create_Name()
+    List=BOM1.Order_Component()
+    Template=Template_List()
+    Template.Write_Component(List)
+
+ 
+    '''
     mark_list=BOM1.Read_One_Column(4)                                                         #读取下标
     volume_list=BOM1.Read_One_Column(1)                                                       #读取大小
     footprint_list=BOM1.Read_One_Column(2)                                                    #读取封装
@@ -224,8 +369,8 @@ if __name__=='__main__':
     Template.Write_OnebyColumn_Quantity(quantity_list)                                        #处理数量
     Template.Write_OnebyColumn_number(mark_list,quantity_list)                                #处理序号
     Template.Write_OnebyColumn_unit(mark_list,quantity_list)                                  #处理单位
-    
+    '''
     print('done')
-    print('branch 2')
+    
     
     
