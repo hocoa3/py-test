@@ -173,21 +173,75 @@ class BOM_List(Component):
             else:
                 leng=0
             for y in range(len(List[x])):
-                for z in range(6):
-                    pos=chr(ord(start_pos[0])+z)+str(int(start_pos[1])+y+leng+off)
-                    if(z==1):
-                        data=List[x][y].mark
-                    elif(z==0):
-                        data=y+leng+5
-                    elif(z==3):
-                        data=List[x][y].name
-                    elif(z==4):
-                        data='个'
-                    elif(z==5):
-                        data=List[x][y].quantity
-                    else:
-                        data=None
-                    self.Write_One_Block(pos,data)
+                if(int(List[x][y].quantity) >4):
+                    num=List[x][y].quantity
+                    for z in range(6):
+                        pos=chr(ord(start_pos[0])+z)+str(int(start_pos[1])+y+leng+off)
+                        if(z==1):
+                            data=List[x][y].mark
+                            name=data.split(', ')
+                            
+                            data=name[0]+', '+name[1]+', '+name[2]+', '+name[3]+', '
+
+                            name=name[4:]
+                            print(name[0])
+                            num-=4
+                            
+                        elif(z==0):
+                            data=y+leng+5
+                        elif(z==3):
+                            data=List[x][y].name
+                        elif(z==4):
+                            data='个'
+                        elif(z==5):
+                            data=List[x][y].quantity
+                        else:
+                            data=None
+                        self.Write_One_Block(pos,data)
+                    off+=1
+                    print(num)
+                    while(num>4):
+                        for z in range(6):
+                            pos=chr(ord(start_pos[0])+z)+str(int(start_pos[1])+y+leng+off)
+                            if(z==1):
+                                data=name[0]+', '+name[1]+', '+name[2]+', '+name[3]+', '
+                                name=name[4:]
+                                num-=4
+                            else:
+                                data=None
+                            self.Write_One_Block(pos,data)
+                        off+=1
+                    for z in range(6):
+                        pos=chr(ord(start_pos[0])+z)+str(int(start_pos[1])+y+leng+off)
+                        if(z==1):
+                            if(num==1):
+                                data=name[0]
+                            else:
+                                data=''
+                                for m in range(len(name)):
+                                    data=data+name[m]+', '
+                                data=data[:-2]
+                        else:
+                            data=None
+                        self.Write_One_Block(pos,data)
+
+                    
+                else:
+                    for z in range(6):
+                        pos=chr(ord(start_pos[0])+z)+str(int(start_pos[1])+y+leng+off)
+                        if(z==1):
+                            data=List[x][y].mark
+                        elif(z==0):
+                            data=y+leng+5
+                        elif(z==3):
+                            data=List[x][y].name
+                        elif(z==4):
+                            data='个'
+                        elif(z==5):
+                            data=List[x][y].quantity
+                        else:
+                            data=None
+                        self.Write_One_Block(pos,data)
         self.Save()
 
     def Read_One_Block(self,loc):
@@ -345,7 +399,7 @@ class Template_List(BOM_List):
         print('save done')
 
 if __name__=='__main__':
-    name1='BOM_Test.xlsx'
+    name1='BOM_Test2.xlsx'
     Template_name=''
     #物料清单源文件名字在此输入
     BOM1=BOM_List(name1)
