@@ -6,16 +6,26 @@ import functools
 import time
 import pHash
 import random
-
+import zipfile
 import numpy as np
-import cv2
-dir=r'D:\幼井作品合集\幼井'
+import cv2,shutil
+import openpyxl
+from PIL import Image,ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES=True
+Image.MAX_IMAGE_PIXELS=None
+dir=r'C:\Users\86178\BaiduNetDisk\!ok\！没看\坊橋夜泊2023.01.17\坊橋夜泊'
+desktop=r'C:\Users\86178\Desktop'
 dir1=(r'C:\Users\86178\BaiduNetDisk\こんな幼馴染がいてほしい\Fanbox\幼馴染系列')
-save_path=r'D:/Nahaki(插画,很棒，等待更新)#21.10'
+save_path=r'C:\Users\86178\BaiduNetDisk\shaggy SUSU 2023.01.15\shaggy SUSU'
 dir=dir.replace('\\','/')                             #将地址转义
+desktop=desktop.replace('\\','/')
 save_path=save_path.replace('\\','/')
 flag=1
+
 #flag=1时为test,2为Bring_all,3为Keep_name,4为相互比较文件
+
+################print(''.join([chr(random.randint(48,102))for i in range(20)]))         #for i in range(20)是创建多少个,48到102可能是ascii码，功能是创建i个随机字符
+
                                                         #str->float
 def metric(func):                                                          
     @functools.wraps(func)
@@ -36,7 +46,7 @@ def log(func):
 
 def Date_Generator(n):
   while(n>0):
-    year=random.randint(2020,2022)   
+    year=random.randint(2020,2022)
     month=random.randint(1,12)
     day=random.randint(1,31)
     yield year,month,day
@@ -47,11 +57,96 @@ for x in Date_Generator(50):
     print(name)
     if(not os.path.exists(dir+'/'+name)):
       os.mkdir(dir+'/'+name)
-'''
-@metric
+'''#いちご
+#@metric      [2022.08.07] ついんて
+months={'January':'01','February':'02','March':'03','April':'04','May':'05','June':'06','July':'07','August':'08','September':'09','October':'10','November':'11','December':'12'}
+desktop_name=r'セネト'
+desktop=desktop+'/'+desktop_name
+def Delete_All(dir):                          #删除一个文件夹中所有文件及其本身
+  for file in os.listdir(dir):
+    if(os.path.isdir(dir+'/'+file)):
+      if(os.listdir(dir+'/'+file)):
+        Delete_All(dir+'/'+file)
+      else:
+        os.rmdir(dir+'/'+file)
+    else:
+      os.remove(dir+'/'+file)
+  os.rmdir(dir)
+  print('删除了所有文件'+dir)
+
 def test(dir,save_path):
-  print('1')
-  '''                         #根据文件创建日期来修改名字
+  for file in os.listdir(dir):
+    if('PSD' in file):
+      print(file)
+      Delete_All(dir+'/'+file)
+  '''                                                                                      
+  for file in os.listdir(dir):                  #删除一个大目录下的所有小空文件夹
+      if(os.path.isdir(dir+'/'+file)):
+        if(not os.listdir(dir+'/'+file)):
+          os.rmdir(dir+'/'+file)
+          print('删除了空文件夹'+dir+'/'+file)
+        else:
+          dir1=dir+'/'+file
+          test(dir1,dir)
+  
+
+  for file in os.listdir(dir):                                    #图片移到上一层并加上这一层名字
+    for file2 in os.listdir(dir+'/'+file):
+      if(os.path.isdir(dir+'/'+file+'/'+file2) and 'jpg' in file2):
+        for file1 in os.listdir(dir+'/'+file+'/'+file2):
+          os.rename(dir+'/'+file+'/'+file2+'/'+file1,dir+'/'+file+'/'+file1)
+          print('修改了'+dir+'/'+file+'/'+file1)
+
+        
+  
+  for file in os.listdir(dir):
+    for key in months:
+      if(key in file):
+        os.rename(dir+'/'+file,dir+'/'+file[:4]+'-'+months[key])
+        print(file[:4]+'-'+months[key])
+                                                 
+  for file in os.listdir(dir):                      #对后一层的文件夹，加上前一层文件夹名字放到前一层去
+    for file1 in os.listdir(dir+'/'+file): 
+      if(os.path.isdir(dir+'/'+file+'/'+file1)):
+        os.renames(dir+'/'+file+'/'+file1,dir+'/'+file+'-'+file1)
+  
+  
+  
+                                                                  #查找特定特征的图片并删除
+  dele_num=0
+  for file in os.listdir(dir):                      
+    if(os.path.isdir(dir+'/'+file)):
+      test(dir+'/'+file,dir)
+    else:
+      if(re.search('0.jpeg',file)):
+        if(Image.open(dir+'/'+file).size==(1200,630)):
+          os.remove(dir+'/'+file)
+          dele_num+=1
+          print(dir+'/'+file)
+  print('删除'+str(dele_num)+'个文件')
+  
+  
+  for file in os.listdir(dir):
+    if(os.path.isdir(dir+'/'+file)):
+      if(re.match('cg',file)):
+        for file1 in os.listdir(dir+'/'+file):
+          os.rename(dir+'/'+file+'/'+file1,dir+'/'+file1)
+      else:
+        test(dir+'/'+file,dir+'/'+file)
+    else:
+      print(dir+'/'+file)
+  
+  for file1 in os.listdir(dir):
+    if('zip' in file1):
+      f=zipfile.ZipFile(dir+'/'+file1,'r')
+      for file in f.namelist():
+        f.extract(file,save_path)
+      f.close()
+      os.remove(dir+'/'+file1)
+    else:
+        print(dir+'/'+file1)                                             #解压文件
+                           
+                           #根据文件创建日期来修改名字
   for file in os.listdir(dir):
     if(os.path.isdir(dir+'/'+file)):
       for file1 in os.listdir(dir+'/'+file):
@@ -61,8 +156,7 @@ def test(dir,save_path):
           print(dir+'/'+file+'/'+file1)
         else:
           os.rename(dir+'/'+file+'/'+file1,dir+'/'+file+'/'+t_time+file1[-4:])
-  '''
-  '''
+  
   for name in os.listdir(dir):                            #删除固定页数以外的其他所有
     dir1=dir+'/'+name
     print(dir1)         
@@ -90,13 +184,11 @@ def test(dir,save_path):
         os.remove(dir1+'/'+str(end1)+'.jpeg')
         print('remove2' +dir1+'/'+str(end1)+'.jpeg')
         end1=end1+1
-  '''
-  ''' 
+  
   idx=s.index('.')                                          #索引目标位置
   p1=reduce(big,map(str2int,s[:idx]))+(reduce(small,map(str2int,s[idx+1:]))/10**len(s[idx+1:]))
   return p1
-  '''                                                                 
-  '''                                                     #杨辉三角
+                                                      #杨辉三角
   L=[1]                                                    #a[::-1]字符串倒写
   yield L
   L=[1,1]
@@ -104,25 +196,24 @@ def test(dir,save_path):
     yield L
     n=n-1
     L=[1]+ [L[i]+L[i+1] for i in range(len(L)-1)] + [1]     #[]+[]可以把列表连接起来
-  '''    
-  '''
+  
   for file in os.listdir(dir):                                #为文件添加前缀
-    os.rename(dir+'/'+file,dir+'/pixiv-'+file)
-  '''
-  '''
+    os.rename(dir+'/'+file,dir+'/晚期作品-'+file)
+  
   for file in os.listdir(dir):                                #../2，把2里的文件提取出来到前一层,变成../file
     for file1 in os.listdir(dir+'/'+file):
       if(os.path.isdir(dir+'/'+file+'/'+file1)):
         Bring_All(dir+'/'+file+'/'+file1,dir+'/'+file)
-  '''
-  '''
-  for file in os.listdir(dir):                              #将年份添加到所属文件夹名字并移出到上一层
-    for file1 in os.listdir(dir+'/'+file):
-      if(os.path.isdir(dir+'/'+file+'/'+file1)):
-        os.renames(dir+'/'+file+'/'+file1,dir+'/'+file+'-'+file1)
-        print(dir+'/'+file+'-'+file1)
-  '''
-  '''
+  
+  
+  for file in os.listdir(dir):                              #将年份添加到所属文件夹名字并将文件夹移出到上一层
+    if(os.path.isdir(dir+'/'+file)):
+      for file1 in os.listdir(dir+'/'+file):
+        if(os.path.isdir(dir+'/'+file+'/'+file1)):                    #若是移动文件,则把isdir改成isfile
+          os.renames(dir+'/'+file+'/'+file1,dir+'/'+file+'-'+file1)
+          print(dir+'/'+file+'-'+file1)
+  
+  
                                                         #移动固定页数到固定文件夹
   sta=216
   #开始页数
@@ -141,18 +232,17 @@ def test(dir,save_path):
       os.rename(dir+'/0'+str(sta)+'.jpg',dir+'/'+str(count)+'/0'+str(sta)+'.jpg')
 
     sta=sta+1
-  '''
-  '''
+  
   for file in os.listdir(dir):                              #根据文件里的特征创建文件夹，然后把对应特征的文件放进去
     if(os.path.isfile(dir+'/'+file)):
-      rt=re.match(r'\d{5,15}',file)
+      rt=re.match(r'\d{6}',file)
       if(rt!=None):
         if(not os.path.exists(dir+'/'+str(rt.group()))):
           os.mkdir(dir+'/'+str(rt.group()))
         os.rename(dir+'/'+file,dir+'/'+str(rt.group())+'/'+file)
         print(dir+'/'+str(rt.group())+'/'+file)
-  '''
-  '''                                                     #给新建文件夹改名
+  
+                                                      #给新建文件夹改名
   for file in os.listdir(dir):
     if(re.match('新建',file)):
       for file1 in os.listdir(dir+'/'+file):
@@ -164,23 +254,24 @@ def test(dir,save_path):
           if(os.path.exists(dir+'/'+file)):
             os.renames(dir+'/'+file,dir+'/'+name1)
         print(file1)
-  '''
+  
 
-  '''
-  for file in os.listdir(dir):                          #检测空文件夹，暂时没法删除
+  
+  empty_folder=0
+  for file in os.listdir(dir):                          #检测空文件夹并删除
     if(os.path.isdir(dir+'/'+file)): 
       if(not os.listdir(dir+'/'+file)):
-        #os.remove(dir+'/'+file)
-        print(dir+'/'+file)
-    else:
-      print('文件:'+file)
-  '''
-'''
+        os.rmdir(dir+'/'+file)
+        print('删除了空文件夹'+dir+'/'+file)
+        empty_folder+=1
+  print('删除了%d个空文件夹' %empty_folder)
+
+
 for file in os.listdir(dir):                        #统一修改文件后缀名
     if(re.search('iso',file)):
       os.rename(dir+'/'+file,dir+'/'+file[:-3]+'rar')
 '''
-'''
+
 def phash(img_addr):
     #第一步,处理图片为32x32，并转为灰度图，数字也用浮点数表示
     img=cv2.imread(img_addr)
@@ -222,7 +313,7 @@ def Haming_Distance(hash1,hash2):                                 #汉明距离�
         print("Amount of Hash Code different")
         return -1
 
-'''
+
 @metric
 def InterComparsion(dir):
   Hash_List=[]
@@ -288,14 +379,14 @@ def main():
         Ham_Dis=Haming_Distance(Hash_List[i],Hash_List[j])
         if(Ham_Dis<5 and Ham_Dis>0):
           print("%s and %s Haming_Distance is %d" % (name_List[i],name_List[j],Ham_Dis))
-        '''
+        
         if(Ham_Dis<5 and Ham_Dis>0):                                                              #汉明距离参数需定义，多少才为相似
           while(os.path.exists(dir+'/'+name_List[i][:-4]+'-'+str(count1)+name_List[i][-4:])):
             count1=count1+1
           if(os.path.exists(dir+'/'+name_List[i][:-4]+'-'+str(count1)+name_List[i][-4:])):  
             os.rename(dir+'/'+name_List[j],dir+'/'+name_List[i][:-4]+'-'+str(count1)+name_List[i][-4:])
           count1=1
-        '''
+        
   elif(flag==5):
     count2=1
     for file in os.listdir(dir):
